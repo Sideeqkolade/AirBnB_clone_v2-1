@@ -118,10 +118,37 @@ class HBNBCommand(cmd.Cmd):
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+        args_list = args.split()
+        class_name = args_list[0]
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
+        """ Extract classname and parameters from input"""
+        class_name, *params = args.split()
+        """ Craete a dictionary to store the parsed parameters"""
+        parsed_params = {}
+        """Loop through the params"""
+        for param in params:
+            """Split the parameter into key and value"""
+            key, value = param.split('=', 1)
+            """Replace underscores with spaces in key"""
+            key = key.replace('_', ' ')
+            """Check if value starts with double quotes"""
+            if value.startswith('""') and value.endswith('""'):
+                """Remove double quotes from value"""
+                value = value[1:-1]
+                """Replace escaped quotes with double quotes"""
+                value = value.replace('\\"', '""')
+            else:
+                try:
+                    value = float(value)
+                    if value.is_integer():
+                        value = int(value)
+                except ValueError:
+                    pass
+            parsed_params[key] = value
+
+        new_instance = HBNBCommand.classes[class_name](*args_list[1:])
         storage.save()
         print(new_instance.id)
         storage.save()
