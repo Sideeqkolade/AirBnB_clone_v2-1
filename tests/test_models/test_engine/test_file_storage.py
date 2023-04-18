@@ -107,3 +107,37 @@ class test_fileStorage(unittest.TestCase):
         from models.engine.file_storage import FileStorage
         print(type(storage))
         self.assertEqual(type(storage), FileStorage)
+    
+    def test_storage_var_type(self):
+        """ FileStorage object storage is type FileStorage """
+        from models.engine.file_storage import FileStorage
+        self.assertEqual(type(storage), FileStorage)
+        
+    def test_storage_var_instance(self):
+        """ FileStorage object storage is instance of FileStorage """
+        from models.engine.file_storage import FileStorage
+        self.assertIsInstance(storage, FileStorage)
+    
+    def test_storage_var(self):
+        """ FileStorage object storage is type FileStorage """
+        from models.engine.file_storage import FileStorage
+        self.assertEqual(type(storage), FileStorage)
+        
+    def test_create(self):
+        """ Test create method """
+        new = BaseModel()
+        new.save()
+        storage.create(new)
+        self.assertTrue(os.path.exists('file.json'))
+    
+    def test_get(self):
+        """ Test get method """
+        new = BaseModel()
+        new.save()
+        self.assertEqual(storage.get('BaseModel', new.id), new)
+    
+    def test_do_create(self):
+        """ Test do_create method """
+        new = BaseModel()
+        new.save()
+        self.assertEqual(storage.do_create(new), new)
