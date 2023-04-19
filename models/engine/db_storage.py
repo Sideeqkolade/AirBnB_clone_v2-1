@@ -27,9 +27,10 @@ class DBStorage:
             getenv("HBNB_MYSQL_HOST"), getenv("HBNB_MYSQL_DB"), pool_pre_ping=True))
 
         if getenv("HBNB_ENV") == 'test':
-            Base.metadata.dropall(self.__engine)
+             Base.metadata.dropall(self.__engine)
 
     def all(self, cls=None):
+        """query on the current database session (self.__session)"""
         empty_dict = {}
         if cls:
             objs = self.__session.query(cls).all()
@@ -38,4 +39,10 @@ class DBStorage:
                 empty_dict[key] = obj
             return empty_dict
         else:
-
+            for key, value in classes.items():
+                objs = self.__session.query(value).all()
+                for obj in objs:
+                    key = obj.__class__.__name__ + '.' + obj.id
+                    empty_dict[key] = obj
+            return empty_dict
+        
