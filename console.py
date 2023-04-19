@@ -148,7 +148,7 @@ class HBNBCommand(cmd.Cmd):
         for param in params:
             try:
                 k, v = param.split("=")
-                k = k.replace("_", " ")
+                v = v.replace("_", " ")
                 if v[0] == '"' and v[-1] == '"' and len(v) > 1:
                     v = v[1:-1]
                 elif "." in v:
