@@ -13,7 +13,7 @@ from models.state import State
 from models.place import Place
 from models.review import Review
 from models.amenity import Amenity
-from models.engine.file_storage 
+#from models.engine.file_storage
 
 
 
@@ -36,18 +36,17 @@ class DBStorage:
         """query on the current database session (self.__session)"""
         empty_dict = {}
         if cls:
-            objs = self.__session.query(cls).all()
+            objs = self.__session.query(classes[cls]).all()
             for obj in objs:
                 key = obj.__class__.__name__ + '.' + obj.id
                 empty_dict[key] = obj
-            return empty_dict
         else:
             for key, value in classes.items():
                 objs = self.__session.query(value).all()
                 for obj in objs:
                     key = obj.__class__.__name__ + '.' + obj.id
                     empty_dict[key] = obj
-            return empty_dict
+        return empty_dict
 
     def new(self, obj):
         """
@@ -73,11 +72,11 @@ class DBStorage:
 
     def reload(self):
         """
-        Reloads
+        Creates all tables in the database
         """
         Base.metadata.create_all(self.__engine)
         session_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
         Session = scoped_session(session_factory)
         self.__session = Session()
-        self.__session.commit()
-        self.save()
+        #self.__session.commit()
+        #self.save()
