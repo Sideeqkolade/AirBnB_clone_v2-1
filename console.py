@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" Console Module """
+"""Console Module."""
 import cmd
 import sys
 from models.base_model import BaseModel
@@ -10,23 +10,26 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+import re
+import os
 
 
 def tokenize(args: str) -> list:
-    """Tokenizer
+    """Tokenizer.
 
     Args:
-        args (str): Description
+        args (str): console input
 
     Returns:
-        list: Description
+        list: list of tokens
     """
-    token = args.split()
-    return token
+
+    tokens = args.split()
+    return tokens
 
 
 class HBNBCommand(cmd.Cmd):
-    """ Contains the functionality for the HBNB console"""
+    """Contains the functionality for the HBNB console."""
 
     # determines prompt for interactive/non-interactive modes
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
@@ -44,7 +47,7 @@ class HBNBCommand(cmd.Cmd):
     }
 
     def preloop(self):
-        """Prints if isatty is false"""
+        """Print if isatty is false."""
         if not sys.__stdin__.isatty():
             print('(hbnb)')
 
@@ -130,16 +133,17 @@ class HBNBCommand(cmd.Cmd):
         """ Create an object of any class"""
         # Tokenize the args from the console
         tokens = tokenize(args)
-        # extract the class name
-        class_name = tokens[0]
-        # extract all params
-        params = tokens[1:]
         # check if args passed
         if args == "":
             print("** class name missing **")
             return
+        # extract the class name
+        class_name = tokens[0]
+        # extract all params
+        params = tokens[1:]
+
         # if class not in class
-        elif class_name not in HBNBCommand.classes:
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
         # create a new class instance
@@ -156,9 +160,9 @@ class HBNBCommand(cmd.Cmd):
                 else:
                     v = int(v)
                 setattr(new_instance, k, v)
-            except Exception:
+            except ValueError:
                 continue
-        storage.save()
+        new_instance.save()
         print(new_instance.id)
         storage.save()
 
@@ -191,7 +195,7 @@ class HBNBCommand(cmd.Cmd):
 
         key = c_name + "." + c_id
         try:
-            print(storage._FileStorage__objects[key])
+            print(storage.all()[key])
         except KeyError:
             print("** no instance found **")
 
@@ -223,7 +227,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del (storage.all()[key])
+            storage.delete(key)
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -242,11 +246,11 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all(self.classes[args]).items():
                 if k.split('.')[0] == args:
                     print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all(None).items():
                 print_list.append(str(v))
 
         print(print_list)
@@ -259,7 +263,7 @@ class HBNBCommand(cmd.Cmd):
     def do_count(self, args):
         """Count current number of class instances"""
         count = 0
-        for k, v in storage._FileStorage__objects.items():
+        for k, v in storage.all().items():
             if args == k.split('.')[0]:
                 count += 1
         print(count)
@@ -355,6 +359,17 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
+    def do_clear(self, args):
+        """Clears the screen
+
+        Args:
+            args(str): console args
+        """
+        if os.name == 'nt':
+            os.system('cls')
+        else:
+            os.system('clear')
 
 
 if __name__ == "__main__":
