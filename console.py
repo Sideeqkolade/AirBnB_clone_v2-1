@@ -3,26 +3,13 @@
 import cmd
 import sys
 from models.base_model import BaseModel
-from models.__init__ import storage
+from models.__init__ import storage, obj_dict
 from models.user import User
 from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
-
-
-def tokenize(args: str) -> list:
-    """Tokenizer
-
-    Args:
-        args (str): Description
-
-    Returns:
-        list: Description
-    """
-    token = args.split()
-    return token
 
 
 class HBNBCommand(cmd.Cmd):
@@ -86,7 +73,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] == '{' and pline[-1] == '}'\
+                    if pline[0] == '{' and pline[-1] == '}' \
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -128,40 +115,39 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        # Tokenize the args from the console
-        tokens = tokenize(args)
-        # extract the class name
-        class_name = tokens[0]
-        # extract all params
-        params = tokens[1:]
-        # check if args passed
-        if args == "":
+        args_ = args.split()
+
+        if not args:
             print("** class name missing **")
             return
-        # if class not in class
-        elif class_name not in HBNBCommand.classes:
+        elif args_[0] not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        # create a new class instance
-        new_instance = HBNBCommand.classes[class_name]()
+
+        object_dict = {}
+        for i in args_:
+            if '=' in i:
+                key = i.split('=')[0]
+                value = i.split('=')[1].strip('"')
+                if key in HBNBCommand.types:
+                    if key in ['longitude', 'latitude']:
+                        value = float(value)
+                    else:
+                        value = int(value)
+                if type(value) == str and '_' in value:
+                    value = value.replace('_', ' ')
+                # if type(value) == str and '\\"' in value:
+                #     value = value.replace('\\"', '')
+
+                object_dict.update({key: value})
+        # print(object_dict)
+
+        new_instance = HBNBCommand.classes[args_[0]](obj_dict=object_dict)
         storage.new(new_instance)
-        # loop through all params and setattr to the object instance
-        for param in params:
-            try:
-                k, v = param.split("=")
-                v = v.replace("_", " ")
-                if v[0] == '"' and v[-1] == '"' and len(v) > 1:
-                    v = v[1:-1]
-                elif "." in v:
-                    v = float(v)
-                else:
-                    v = int(v)
-                setattr(new_instance, k, v)
-            except Exception:
-                continue
         storage.save()
         print(new_instance.id)
         storage.save()
+
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")
@@ -191,8 +177,7 @@ class HBNBCommand(cmd.Cmd):
 
         key = c_name + "." + c_id
         try:
-            print(storage.__FileStorage__objects[key])
-            #storage.save()
+            print(storage._FileStorage__objects[key])
         except KeyError:
             print("** no instance found **")
 
@@ -243,14 +228,14 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage.all().items():
+            for k, v in obj_dict.items():
                 if k.split('.')[0] == args:
                     print_list.append(str(v))
         else:
-            for k, v in storage.all().items():
+            for k, v in obj_dict.items():
                 print_list.append(str(v))
 
-            print(print_list)
+        print(print_list)
 
     def help_all(self):
         """ Help information for the all command """
