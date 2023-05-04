@@ -31,7 +31,7 @@ content='<!DOCTYPE html>
         </head>
         <body>Just testing</body>
 </html>'
-sudo echo "$content" > /data/web_static/releases/test/index.html
+echo "$content" > /data/web_static/releases/test/index.html
 sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 chown -R ubuntu:ubuntu /data/
 
@@ -43,5 +43,5 @@ config="server {
         }
 }"
 
-sudo echo -e "$config" > /etc/nginx/sites-enabled/default
+echo -e "$config" > /etc/nginx/sites-enabled/default
 sudo service nginx restart
